@@ -1,0 +1,10 @@
+{
+  "specVersion": 1,
+  "name": "App Store",
+  "description": "Creates invoices based on App Store Connect’s monthly report.",
+  "version": "1.0.0",
+  "url": "https://github.com/usebilly/app-store-plugin",
+  "author": "Billy",
+  "authorUrl": "https://usebilly.app",
+  "fileExtension": "csv"
+}
