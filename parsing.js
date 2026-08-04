@@ -58,7 +58,8 @@ exports.regionName = function(label) {
 		.trim();
 };
 
-// English month names (full and common abbreviations) to a 1-based number.
+// Month names to a 1-based number: English (full and common abbreviations) and German.
+// The report title is localized, so its month name is in the account’s language.
 var MONTHS = {
 	january: 1,
 	february: 2,
@@ -84,6 +85,68 @@ var MONTHS = {
 	oct: 10,
 	nov: 11,
 	dec: 12,
+	// German, French, Spanish, Italian, Dutch, Portuguese. Each block lists only the spellings not already covered above, so no name maps to two months.
+	// German.
+	januar: 1,
+	februar: 2,
+	märz: 3,
+	mai: 5,
+	juni: 6,
+	juli: 7,
+	oktober: 10,
+	dezember: 12,
+	// French.
+	janvier: 1,
+	février: 2,
+	mars: 3,
+	avril: 4,
+	juin: 6,
+	juillet: 7,
+	août: 8,
+	septembre: 9,
+	octobre: 10,
+	novembre: 11,
+	décembre: 12,
+	// Spanish.
+	enero: 1,
+	febrero: 2,
+	marzo: 3,
+	abril: 4,
+	mayo: 5,
+	junio: 6,
+	julio: 7,
+	agosto: 8,
+	septiembre: 9,
+	octubre: 10,
+	noviembre: 11,
+	diciembre: 12,
+	// Italian.
+	gennaio: 1,
+	febbraio: 2,
+	aprile: 4,
+	maggio: 5,
+	giugno: 6,
+	luglio: 7,
+	settembre: 9,
+	ottobre: 10,
+	dicembre: 12,
+	// Dutch.
+	januari: 1,
+	februari: 2,
+	maart: 3,
+	mei: 5,
+	augustus: 8,
+	// Portuguese.
+	janeiro: 1,
+	fevereiro: 2,
+	março: 3,
+	maio: 5,
+	junho: 6,
+	julho: 7,
+	setembro: 9,
+	outubro: 10,
+	novembro: 11,
+	dezembro: 12,
 };
 
 // Extract { year, month } (month 1-based) from a report title line such as `iTunes Connect - Payments and Financial Reports\t(June, 2026)`.

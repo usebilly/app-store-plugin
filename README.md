@@ -9,6 +9,7 @@ A [Billy](https://usebilly.app) plugin that turns Apple’s monthly **Payments a
 - **Reverse-charge note where it applies.** The Ireland invoice gets an automatic reverse-charge marginal note when your tax residency is an EU state other than Ireland (see below).
 - **Service period.** Each invoice’s service dates span the reporting month.
 - **Invoice date.** The first day of the month after the reporting period (a June 2026 report → 1 July 2026).
+- **Localized reports.** The split and the amounts are language-independent (columns by position, regions by currency code); the reporting-month date is read for English, German, French, Spanish, Italian, Dutch and Portuguese, and a report in any other language still imports—just without the service period and invoice date.
 
 Invoice number, sender details, and payment terms come from your active Billy profile—exactly as if you’d hit **New Invoice**. The currency comes from the report’s payout currency.
 
@@ -18,15 +19,15 @@ Attribution follows [Schedule 2, Exhibit A of Apple’s Paid Applications Agreem
 
 | Region (examples) | Invoiced entity |
 |---|---|
-| Euro-Zone, United Kingdom, Switzerland, Rest of Europe, China, India | Apple Distribution International Limited, Cork, Ireland (VAT `IE9700053D`) |
+| Euro-Zone, United Kingdom, Switzerland, China, India, Indonesia, Malaysia, Singapore, Nigeria—and most of Europe, Africa, the Middle East and Asia | Apple Distribution International Limited, Cork, Ireland (VAT `IE9700053D`) |
 | Americas / United States | Apple Inc., Cupertino, USA |
 | Canada | Apple Canada Inc., Toronto |
-| Latin America and the Caribbean, Mexico, Brazil | Apple Services LATAM LLC, Coral Gables, USA |
+| Brazil, Mexico, Chile, Colombia, Peru—and the rest of Latin America and the Caribbean | Apple Services LATAM LLC, Coral Gables, USA |
 | Australia, New Zealand | Apple Pty Limited, Sydney |
 | Japan | iTunes K.K., Tokyo |
-| (smaller Asia-Pacific storefronts) | Apple Services Pte. Ltd., Singapore |
+| South Korea (and Apple’s other Asia-Pacific storefronts) | Apple Services Pte. Ltd., Singapore |
 
-The summary report groups sales into broad regions, so mixed catch-alls like **Rest of World** can’t be split by country—they’re attributed to Apple Distribution International (Ireland) by default, as a labelled line item you can reassign.
+Attribution keys off the **ISO currency code** in each region label—e.g. `(AUD)`, `(BRL)`—which is the same in every report language. Apple Distribution International (Ireland) covers the large majority of territories, so it is also the default for any currency the plugin doesn’t recognise; a mixed catch-all like **Rest of World** lands there as a labelled line item you can reassign.
 
 ## VAT / Reverse Charge
 
@@ -63,7 +64,8 @@ The plugin reads Apple’s standard **Payments and Financial Report**—the regi
 | `Proceeds` | Line-item amount (already in your bank account currency) |
 | `Bank Account Currency` | Invoice currency |
 
-The reporting month comes from the report title, e.g. `(June, 2026)`. Summary and “Paid to …” rows have no region and are ignored; rows with zero proceeds are skipped.
+Works with reports in **any App Store Connect language**—only the invoice dates need a month name it knows (English, German, French, Spanish, Italian, Dutch, Portuguese); other languages import without them.
+Only the settled payout is imported—summary and “Estimated Proceeds” rows are skipped.
 
 ## Building / Contributing
 

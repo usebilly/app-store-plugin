@@ -41,32 +41,25 @@ var RECIPIENTS = {
 // Preferred order for the invoices we emit (largest / most common first).
 var CORP_ORDER = ['EU', 'US', 'CA', 'LL', 'AU', 'JP', 'AP'];
 
-// Region to subsidiary determined from apple-slicer’s country groupings: its `europe` bucket also covers the UK, Switzerland, China and India, so those regions map to the Irish entity too.
+// Apple Distribution International (Ireland) is the default: apple-slicer’s `europe` bucket covers the large majority of Apple’s territories—not just Europe, but China, India, Indonesia, Malaysia, Singapore, Nigeria and more.
 var DEFAULT_CORP = 'EU';
 
-// Ordered keyword rules matched against the lower-cased region label.
-// First hit wins, so more specific labels precede broader ones.
-var REGION_RULES = [
-	['euro-zone', 'EU'],
-	['euro zone', 'EU'],
-	['eurozone', 'EU'],
-	['united kingdom', 'EU'],
-	['switzerland', 'EU'],
-	['rest of europe', 'EU'],
-	['europe', 'EU'],
-	['china', 'EU'],
-	['india', 'EU'],
-	['canada', 'CA'],
-	['japan', 'JP'],
-	['new zealand', 'AU'],
-	['australia', 'AU'],
-	['latin america', 'LL'],
-	['caribbean', 'LL'],
-	['mexico', 'LL'],
-	['brazil', 'LL'],
-	['united states', 'US'],
-	['americas', 'US'],
-];
+// The payments report lists one row per payout currency, and each row’s region label ends with an ISO-4217 currency code, e.g. “Australien (AUD)”. The subsidiary gets defined by that code.
+// Only the currencies billed by a non-Ireland entity are listed here—every other code (EUR, GBP, CHF, CNY, INR, IDR, MYR, NGN, RON, SGD, …) falls through to DEFAULT_CORP.
+var CURRENCY_RULES = {
+	AUD: 'AU', // Australia
+	NZD: 'AU', // New Zealand
+	CAD: 'CA', // Canada
+	JPY: 'JP', // Japan
+	KRW: 'AP', // South Korea (apple-slicer’s `apac` bucket)
+	USD: 'US', // Americas
+	BRL: 'LL', // Brazil
+	MXN: 'LL', // Mexico
+	CLP: 'LL', // Chile
+	COP: 'LL', // Colombia
+	PEN: 'LL', // Peru
+	ARS: 'LL', // Argentina
+};
 
 exports.CORP_ORDER = CORP_ORDER;
 exports.vatIdEurope = VAT_ID_EUROPE;
@@ -88,13 +81,17 @@ exports.recipientFor = function(corp) {
 	return { name: r.name, address: address };
 };
 
-// Resolve a region label to { corp, exact }. exact === false means the label wasn’t recognised and was assigned to the default entity as a best guess.
+// Pull the trailing ISO-4217 currency code from a region label, e.g. “Australien (AUD)” → “AUD”. Returns '' when the label has no such code.
+function currencyCode(regionLabel) {
+	var match = String(regionLabel == null ? '' : regionLabel).match(/\(([A-Za-z]{3})\)\s*$/);
+	return match ? match[1].toUpperCase() : '';
+}
+
+exports.currencyCode = currencyCode;
+
+// Resolve a region label to { corp, exact }. exact === false means the label carried no currency code and was assigned to the default entity as a best guess.
 exports.corpForRegion = function(regionLabel) {
-	var text = String(regionLabel || '').toLowerCase();
-	for (var i = 0; i < REGION_RULES.length; i++) {
-		if (text.indexOf(REGION_RULES[i][0]) !== -1) {
-			return { corp: REGION_RULES[i][1], exact: true };
-		}
-	}
-	return { corp: DEFAULT_CORP, exact: false };
+	var code = currencyCode(regionLabel);
+	if (!code) return { corp: DEFAULT_CORP, exact: false };
+	return { corp: CURRENCY_RULES[code] || DEFAULT_CORP, exact: true };
 };
