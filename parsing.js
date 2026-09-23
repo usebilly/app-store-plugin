@@ -1,6 +1,6 @@
-// Shared helpers for the App Store Connect Payments importer.
+// Shared helpers for the App Store Connect report importers.
 
-// Split a single CSV line into fields, honoring double-quoted fields.
+// Split a single delimited line (comma for CSV, tab for TXT) into fields, honoring double-quoted fields.
 function splitLine(line, delimiter) {
 	var fields = [];
 	var current = '';
@@ -29,7 +29,11 @@ function splitLine(line, delimiter) {
 
 exports.splitLine = splitLine;
 
-// Parse a numeric cell from the report.
+exports.trim = function(value) {
+	return String(value == null ? '' : value).trim();
+};
+
+// Parse a numeric cell from the report, in US (“1,234.50”) or European (“1.234,50”) notation.
 exports.parseAmount = function(value) {
 	if (value == null) return NaN;
 	var text = String(value).trim();
@@ -37,14 +41,31 @@ exports.parseAmount = function(value) {
 
 	var negative = /^\(.*\)$/.test(text);
 
-	// Keep digits, dot and minus; drop thousands commas, currency letters, spaces.
-	var cleaned = text.replace(/,/g, '').replace(/[^0-9.\-]/g, '');
+	// Keep digits, separators and minus; drop currency letters and spaces.
+	var cleaned = normalizeSeparators(text.replace(/[^0-9.,\-]/g, ''));
 	if (cleaned === '' || cleaned === '-' || cleaned === '.') return NaN;
 
 	var number = parseFloat(cleaned);
 	if (isNaN(number)) return NaN;
 	return negative ? -Math.abs(number) : number;
 };
+
+// Rewrite a number to use a dot as the only decimal separator.
+// With both separators, the last one is the decimal separator. A lone comma followed by anything but three digits is a decimal comma (“2,14”); otherwise commas group thousands (“1,234”). Several dots group thousands (“1.234.567”), a single dot stays a decimal point.
+function normalizeSeparators(text) {
+	var lastComma = text.lastIndexOf(',');
+	var lastDot = text.lastIndexOf('.');
+	if (lastComma !== -1 && lastDot !== -1) {
+		return lastComma > lastDot ? text.replace(/\./g, '').replace(',', '.') : text.replace(/,/g, '');
+	}
+	if (lastComma !== -1) {
+		var commaCount = text.split(',').length - 1;
+		var decimalCount = text.length - lastComma - 1;
+		return commaCount === 1 && decimalCount !== 3 ? text.replace(',', '.') : text.replace(/,/g, '');
+	}
+	if (text.split('.').length > 2) return text.replace(/\./g, '');
+	return text;
+}
 
 // Round to 2 decimals to keep away from floating-point noise.
 exports.round2 = function(value) {
@@ -170,6 +191,32 @@ exports.parsePeriod = function(titleLine) {
 function pad(n) {
 	return (n < 10 ? '0' : '') + n;
 }
+
+// A date cell as { year, month, day }, or null when the text isn’t a valid date.
+// Understands ISO “2026-08-19”, European “19.08.2026”, and slash dates—month-first “08/19/2026” (US), or day-first “19/08/2026” when dayFirst is set.
+exports.parseDate = function(text, dayFirst) {
+	var value = String(text == null ? '' : text).trim();
+	var match = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+	if (match) return validDate(match[1], match[2], match[3]);
+	match = value.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+	if (match) return validDate(match[3], match[2], match[1]);
+	match = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+	if (match) return dayFirst ? validDate(match[3], match[2], match[1]) : validDate(match[3], match[1], match[2]);
+	return null;
+};
+
+function validDate(yearText, monthText, dayText) {
+	var year = parseInt(yearText, 10);
+	var month = parseInt(monthText, 10);
+	var day = parseInt(dayText, 10);
+	if (month < 1 || month > 12 || day < 1 || day > new Date(year, month, 0).getDate()) return null;
+	return { year: year, month: month, day: day };
+}
+
+// A date as an ISO "yyyy-MM-dd" string.
+exports.isoDate = function(year, month, day) {
+	return year + '-' + pad(month) + '-' + pad(day);
+};
 
 // First day of the month as an ISO "yyyy-MM-dd" string.
 exports.startOfMonth = function(year, month) {

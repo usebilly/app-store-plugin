@@ -6,6 +6,5 @@
   "url": "https://github.com/usebilly/app-store-plugin",
   "author": "Billy",
   "authorUrl": "https://usebilly.app",
-  "fileExtension": "csv",
   "minBillyVersion": "1.1.2"
 }

@@ -62,6 +62,37 @@ var CURRENCY_RULES = {
 };
 
 exports.CORP_ORDER = CORP_ORDER;
+
+// Subsidiary code for an ISO-4217 payout currency.
+function corpForCurrency(code) {
+	return CURRENCY_RULES[String(code || '').toUpperCase()] || DEFAULT_CORP;
+}
+
+exports.corpForCurrency = corpForCurrency;
+
+// Storefront country (ISO 3166-1 alpha-2) per subsidiary, from apple-slicer’s apple.py. The Financial Report (TXT) names the country of every sale, so it can follow the agreement exactly—unlike currency, since many storefronts outside the US sell in USD.
+var COUNTRIES_BY_CORP = {
+	EU: ['AF', 'AL', 'DZ', 'AO', 'AM', 'AT', 'AZ', 'BH', 'BY', 'BE', 'BJ', 'BA', 'BW', 'BG', 'BF', 'CM', 'CV', 'TD', 'CN', 'CD', 'CG', 'CI', 'HR', 'CY', 'CZ', 'DK', 'EG', 'EE', 'FI', 'FR', 'GA', 'GM', 'GE', 'DE', 'GH', 'GR', 'GW', 'HK', 'HU', 'IS', 'IN', 'ID', 'IQ', 'IE', 'IL', 'IT', 'JO', 'KZ', 'KE', 'XK', 'KW', 'KG', 'LV', 'LB', 'LR', 'LY', 'LT', 'LU', 'MK', 'MG', 'MW', 'MY', 'ML', 'MT', 'MR', 'MU', 'MD', 'ME', 'MA', 'MZ', 'NA', 'NL', 'NE', 'NG', 'NO', 'OM', 'PK', 'PH', 'PL', 'PT', 'QA', 'RO', 'RU', 'RW', 'ST', 'SA', 'SN', 'RS', 'SC', 'SL', 'SG', 'SK', 'SI', 'ZA', 'ES', 'SZ', 'SE', 'CH', 'TW', 'TJ', 'TZ', 'TH', 'TN', 'TR', 'TM', 'AE', 'UG', 'UA', 'GB', 'UZ', 'VN', 'YE', 'ZM', 'ZW'],
+	US: ['US'],
+	CA: ['CA'],
+	LL: ['AI', 'AG', 'AR', 'BS', 'BB', 'BZ', 'BM', 'BO', 'BR', 'VG', 'KY', 'CL', 'CO', 'CR', 'DM', 'DO', 'EC', 'SV', 'GD', 'GY', 'GT', 'HN', 'JM', 'MX', 'MS', 'NI', 'PA', 'PY', 'PE', 'KN', 'LC', 'VC', 'SR', 'TT', 'TC', 'UY', 'VE'],
+	AU: ['AU', 'NZ'],
+	JP: ['JP'],
+	AP: ['BT', 'BN', 'KH', 'FM', 'FJ', 'KR', 'LA', 'MO', 'MV', 'MN', 'MM', 'NR', 'NP', 'PW', 'PG', 'SB', 'LK', 'TO', 'VU'],
+};
+
+var CORP_BY_COUNTRY = {};
+Object.keys(COUNTRIES_BY_CORP).forEach(function(corp) {
+	COUNTRIES_BY_CORP[corp].forEach(function(country) {
+		CORP_BY_COUNTRY[country] = corp;
+	});
+});
+
+// Subsidiary code for a storefront country. A country missing from the table (e.g. a storefront Apple added later) falls back to the currency rule.
+exports.corpForCountry = function(countryCode, currencyCode) {
+	return CORP_BY_COUNTRY[String(countryCode || '').toUpperCase()] || corpForCurrency(currencyCode);
+};
+
 exports.vatIdEurope = VAT_ID_EUROPE;
 
 // EU member states (ISO 3166-1 alpha-2). Ireland is a member but is the excluded case for reverse charge.
@@ -93,5 +124,5 @@ exports.currencyCode = currencyCode;
 exports.corpForRegion = function(regionLabel) {
 	var code = currencyCode(regionLabel);
 	if (!code) return { corp: DEFAULT_CORP, exact: false };
-	return { corp: CURRENCY_RULES[code] || DEFAULT_CORP, exact: true };
+	return { corp: corpForCurrency(code), exact: true };
 };
