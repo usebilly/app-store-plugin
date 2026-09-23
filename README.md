@@ -9,8 +9,8 @@ A [Billy](https://usebilly.app) plugin that turns Apple’s monthly **Payments a
 - **Refunds.** From the TXT, returns get their own line marked “Refund” with a negative amount, so they’re visible on the invoice and deducted from its total.
 - **Reverse-charge note where it applies.** The Ireland invoice gets an automatic reverse-charge marginal note when your tax residency is an EU state other than Ireland (see below).
 - **Service period.** Each invoice’s service dates span the reporting month (CSV) or Apple’s exact fiscal period from the report’s start and end date (TXT).
-- **Invoice date.** The first day of the month after the reporting period (a June 2026 report → 1 July 2026). For the TXT, that’s Apple’s fiscal month (28 June–1 August 2026 is July → 1 August 2026).
-- **Any report language.** Both formats import whatever language your App Store Connect account uses. For the CSV, the invoice dates need a month name the plugin knows (English, German, French, Spanish, Italian, Dutch, Portuguese); other languages import without them.
+- **Invoice date.** Today, like any new invoice.
+- **Any report language.** Both formats import whatever language your App Store Connect account uses. For the CSV, the service period needs a month name the plugin knows (English, German, French, Spanish, Italian, Dutch, Portuguese); other languages import without it.
 - **Descriptions.** See [Line Item Descriptions](#line-item-descriptions) for how they’re built and which parts follow your invoice language.
 
 Invoice number, sender details, and payment terms come from your active Billy profile—exactly as if you’d hit **New Invoice**. The currency comes from the report: the bank account currency for the CSV, the sale currency for the TXT.
@@ -68,7 +68,7 @@ The regional summary of a payout. It uses these columns:
 | `Proceeds` | Line-item amount (already in your bank account currency) |
 | `Bank Account Currency` | Invoice currency |
 
-Works with reports in **any App Store Connect language**—only the invoice dates need a month name it knows (English, German, French, Spanish, Italian, Dutch, Portuguese); other languages import without them.
+Works with reports in **any App Store Connect language**—only the service period needs a month name it knows (English, German, French, Spanish, Italian, Dutch, Portuguese); other languages import without it.
 Only the settled payout is imported—summary and “Estimated Proceeds” rows are skipped.
 
 ### Financial Report (TXT)

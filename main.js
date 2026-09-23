@@ -51,6 +51,7 @@ function buildInvoices(report, profile, language) {
 	});
 
 	return orderedGroups(groups).map(function(group) {
+		// No date is set, so Billy dates the invoice today—like a new invoice.
 		var patch = {
 			recipient: recipients.recipientFor(group.corp),
 			currency: group.currency,
@@ -59,7 +60,6 @@ function buildInvoices(report, profile, language) {
 		if (report.period) {
 			patch.serviceDateStart = report.period.serviceDateStart;
 			patch.serviceDateEnd = report.period.serviceDateEnd;
-			patch.date = report.period.date;
 		}
 		// Only the Irish entity gets a reverse-charge notice, and only when the developer is EU-established outside Ireland.
 		if (group.corp === 'EU' && reverseCharge) {

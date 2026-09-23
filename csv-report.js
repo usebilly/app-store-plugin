@@ -14,7 +14,7 @@ exports.matches = function(lines) {
 	return false;
 };
 
-// Returns { entries: [{ corp, currency, label, quantity, unit, unitPrice }], period: { serviceDateStart, serviceDateEnd, date } | null }, or null when no table is found.
+// Returns { entries: [{ corp, currency, label, quantity, unit, unitPrice }], period: { serviceDateStart, serviceDateEnd } | null }, or null when no table is found.
 exports.parse = function(lines) {
 	// Find the header row. Rather than match localized column names, spot it structurally: the first row whose region cell is set and whose next cell is a text label (data rows carry the units-sold number there).
 	var headerIndex = -1;
@@ -84,8 +84,6 @@ exports.parse = function(lines) {
 			? {
 					serviceDateStart: parsing.startOfMonth(period.year, period.month),
 					serviceDateEnd: parsing.endOfMonth(period.year, period.month),
-					// Issue date: the first of the month after the reporting period.
-					date: parsing.firstOfNextMonth(period.year, period.month),
 				}
 			: null,
 	};

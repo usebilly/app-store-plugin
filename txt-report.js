@@ -23,7 +23,7 @@ exports.matches = function(lines) {
 	return lines.map(splitRow).some(isTransactionRow);
 };
 
-// Returns { entries: [{ corp, currency, label, quantity, unit, unitPrice, refund }], period: { serviceDateStart, serviceDateEnd, date } | null }, or null when no table is found.
+// Returns { entries: [{ corp, currency, label, quantity, unit, unitPrice, refund }], period: { serviceDateStart, serviceDateEnd } | null }, or null when no table is found.
 exports.parse = function(lines, language) {
 	var rows = lines.map(splitRow);
 	var dayFirst = slashDatesAreDayFirst(rows);
@@ -131,7 +131,6 @@ function slashDatesAreDayFirst(rows) {
 
 // The preamble holds the start and end date of Apple’s fiscal month, in that order. They’re read by position—the first two dates—rather than by their labels.
 // The fiscal month rarely matches the calendar month (e.g. 06/28–08/01 for July), so the service period uses those exact dates.
-// The fiscal month is the calendar month holding the middle of that range; the invoice is dated the first of the month after it, like the CSV report.
 function parsePeriod(preambleRows, dayFirst) {
 	var dates = [];
 	preambleRows.forEach(function(row) {
@@ -142,18 +141,11 @@ function parsePeriod(preambleRows, dayFirst) {
 	});
 	if (dates.length < 2) return null;
 
-	var start = dates[0];
-	var end = dates[1];
-	var startTime = Date.UTC(start.year, start.month - 1, start.day);
-	var endTime = Date.UTC(end.year, end.month - 1, end.day);
-	if (endTime < startTime) return null;
-	var middle = new Date((startTime + endTime) / 2);
+	var start = parsing.isoDate(dates[0].year, dates[0].month, dates[0].day);
+	var end = parsing.isoDate(dates[1].year, dates[1].month, dates[1].day);
+	if (end < start) return null;
 
-	return {
-		serviceDateStart: parsing.isoDate(start.year, start.month, start.day),
-		serviceDateEnd: parsing.isoDate(end.year, end.month, end.day),
-		date: parsing.firstOfNextMonth(middle.getUTCFullYear(), middle.getUTCMonth() + 1),
-	};
+	return { serviceDateStart: start, serviceDateEnd: end };
 }
 
 // Localized country name for an ISO 3166-1 code, e.g. “DE” → “Deutschland”. Falls back to the code where the JavaScript engine lacks Intl.DisplayNames.

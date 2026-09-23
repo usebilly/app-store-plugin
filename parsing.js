@@ -228,10 +228,3 @@ exports.endOfMonth = function(year, month) {
 	var lastDay = new Date(year, month, 0).getDate();
 	return year + '-' + pad(month) + '-' + pad(lastDay);
 };
-
-// First day of the month after the given one, as an ISO "yyyy-MM-dd" string.
-exports.firstOfNextMonth = function(year, month) {
-	var y = month >= 12 ? year + 1 : year;
-	var m = month >= 12 ? 1 : month + 1;
-	return y + '-' + pad(m) + '-01';
-};
