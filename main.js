@@ -55,6 +55,8 @@ function buildInvoices(report, profile, language) {
 		var patch = {
 			recipient: recipients.recipientFor(group.corp),
 			currency: group.currency,
+				showPaymentPeriod: false,
+				showBankDetails: false,
 			items: group.items,
 		};
 		if (report.period) {
